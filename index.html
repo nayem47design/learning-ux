@@ -282,10 +282,11 @@ mark{background:#f6e27a;color:inherit;border-radius:2px;padding:0 1px}
     <div class="sect-h"><h2>Free lessons</h2><p>Short sessions on AI for product designers. Newest first.</p></div>
     <div class="frow" id="frow">
       <button class="fpill" type="button" data-pop="format">Format<span id="b-format"></span></button>
-      <button class="fpill" type="button" data-pop="age">Recorded<span id="b-age"></span></button>
+      <button class="fpill" type="button" data-pop="age">Recorded date<span id="b-age"></span></button>
       <button class="fpill" type="button" data-pop="authors">Instructor<span id="b-authors"></span></button>
       <button class="fpill" type="button" data-pop="aud">Audience<span id="b-aud"></span></button>
       <button class="fpill" type="button" data-pop="len">Length<span id="b-len"></span></button>
+      <button class="fpill" type="button" id="recBtn" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>Recorded only</button>
       <button class="fpill" type="button" id="latestBtn" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>Latest edition only</button>
       <span class="fsep"></span>
       <button class="fpill" type="button" data-pop="sort"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg><span id="sortLbl">Newest</span></button>
@@ -395,7 +396,7 @@ function renderLessons(){const T=terms();const res=filtered().sort(SORTS[S.sort]
   const ch=[];if(S.q)ch.push(['q','',`“${S.q}”`]);if(S.topic)ch.push(['topic','',S.topic]);if(S.status!=='all')ch.push(['status','',S.status==='Live'?'Upcoming live':'Recorded']);if(S.age)ch.push(['age','',`Last ${S.age/30|0} months`]);if(S.latestOnly)ch.push(['latestOnly','','Latest edition only']);['authors','aud','len'].forEach(k=>S[k].forEach(v=>ch.push([k,v,v.replace(/^For /,'')])));
   $('#summary').innerHTML=`<span class="count">${res.length} <span>of ${L.length} lessons</span></span>`+ch.map(([k,v,t])=>`<span class="chip">${esc(t)}<i role="button" tabindex="0" aria-label="Remove ${esc(t)}" data-ck="${k}" data-cv="${esc(v)}">✕</i></span>`).join('')+(ch.length?`<button class="linkbtn" type="button" data-reset>Clear all</button>`:'');
   badgeCount('b-format',S.status!=='all'?1:0);badgeCount('b-age',S.age?1:0);badgeCount('b-authors',S.authors.size);badgeCount('b-aud',S.aud.size);badgeCount('b-len',S.len.size);
-  $('#latestBtn').classList.toggle('on',S.latestOnly);$('#latestBtn').setAttribute('aria-pressed',S.latestOnly);$('#sortLbl').textContent=SORTS[S.sort][0]}
+  $('#recBtn').classList.toggle('on',S.status==='Watch');$('#recBtn').setAttribute('aria-pressed',S.status==='Watch');$('#latestBtn').classList.toggle('on',S.latestOnly);$('#latestBtn').setAttribute('aria-pressed',S.latestOnly);$('#sortLbl').textContent=SORTS[S.sort][0]}
 
 /* ---------- latest by topic ---------- */
 function renderLatest(){const base=filtered('topic');const groups=(S.topic?[S.topic]:TOPICS).map(t=>[t,base.filter(l=>l.topics.includes(t)&&l.lg).sort(SORTS.new[1])]).filter(g=>g[1].length);
@@ -502,6 +503,7 @@ $('#qclr').onclick=()=>{$('#q').value='';S.q='';if(S.sort==='rel')S.sort='new';r
 document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();$('#q').focus()}
   if(e.key==='Escape'){if(!$('#theater').hidden)closeWatch();else if(!$('#pop').hidden)closePop();else if(!$('#sheet').hidden)closeSheet()}
   if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-ck]')){e.preventDefault();e.target.click()}});
+$('#recBtn').onclick=()=>{S.status=S.status==='Watch'?'all':'Watch';S.limit=24;render()};
 $('#latestBtn').onclick=()=>{S.latestOnly=!S.latestOnly;save();render()};
 $('#liBtn').onclick=()=>{S.liOnly=!S.liOnly;render()};
 $('#more').onclick=()=>{S.limit+=24;renderLessons()};
