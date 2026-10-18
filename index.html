@@ -219,6 +219,29 @@ mark{background:#f6e27a;color:inherit;border-radius:2px;padding:0 1px}
 
 @media (prefers-reduced-motion:no-preference){.sheet{animation:in .2s ease-out}@keyframes in{from{transform:translateX(30px);opacity:.5}}}
 @media (max-width:600px){.hero p{display:none}.crumbs .snap{display:none}.sect-h h2{font-size:26px}}
+
+.rm-top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.rm-roles{display:flex;gap:8px;flex-wrap:wrap}
+.rm-prog{flex:1;min-width:220px;max-width:340px}
+.rm-prog .t{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.rm-bar{height:6px;border-radius:3px;background:var(--rule)}
+.rm-bar i{display:block;height:6px;border-radius:3px;background:var(--plum-hi);width:0;transition:width .2s}
+.rm-stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:20px}
+.rm-stages button{text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--rule);background:var(--paper);font-size:12.5px;color:var(--ink-2);line-height:1.35}
+.rm-stages button b{display:block;font-size:14px;color:var(--ink);font-weight:600}
+.rm-stages button[aria-pressed="true"]{background:var(--mist);border-color:var(--plum-hi)}
+.rm-goal{margin:0 0 12px;color:var(--ink-2)}
+.rm-list{display:grid;gap:10px}
+.rm-item{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--paper)}
+.rm-item input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--plum-hi)}
+.rm-item .b{flex:1;min-width:0}
+.rm-item .tt{font-weight:600;font-size:15px;line-height:1.35;display:block}
+.rm-item .tm{font-size:13px;color:var(--ink-2);margin-top:3px}
+.rm-item.done .tt{text-decoration:line-through;color:var(--ink-2)}
+.rm-item button.open{flex:none;border:1px solid var(--rule);background:var(--paper);border-radius:999px;height:32px;padding:0 12px;font-size:13px;font-weight:500}
+.rm-item button.open:hover{border-color:var(--ink)}
+.rm-foot{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+@media(max-width:700px){.rm-stages{grid-template-columns:1fr 1fr}.rm-item{flex-wrap:wrap}}
 </style>
 
 <div class="band">
@@ -249,6 +272,7 @@ mark{background:#f6e27a;color:inherit;border-radius:2px;padding:0 1px}
       <button role="tab" data-tab="lessons" aria-selected="true">Free lessons <span class="n" id="n-lessons"></span></button>
       <button role="tab" data-tab="latest" aria-selected="false">Latest by topic <span class="n" id="n-topics"></span></button>
       <button role="tab" data-tab="authors" aria-selected="false">Instructors <span class="n" id="n-authors"></span></button>
+      <button role="tab" data-tab="roadmap" aria-selected="false">Roadmap <span class="n" id="n-road"></span></button>
     </nav>
   </div>
 </div>
@@ -284,6 +308,17 @@ mark{background:#f6e27a;color:inherit;border-radius:2px;padding:0 1px}
     </div>
     <div class="summary" id="asummary"></div>
     <div class="agrid" id="agrid"></div>
+  </section>
+  <section id="v-roadmap" hidden>
+    <div class="sect-h"><h2>Learning roadmap</h2><p>Eight weeks from first prototype to measuring what works, built from the lessons in this library.</p></div>
+    <div class="rm-top">
+      <div class="rm-roles" id="rm-roles" role="group" aria-label="Choose your role"></div>
+      <div class="rm-prog"><div class="t"><span id="rm-sum"></span><span id="rm-pct"></span></div><div class="rm-bar"><i id="rm-bar"></i></div></div>
+    </div>
+    <div class="rm-stages" id="rm-stages"></div>
+    <p class="rm-goal" id="rm-goal"></p>
+    <div class="rm-list" id="rm-list"></div>
+    <div class="rm-foot"><span>Progress is saved in this browser only.</span><button class="linkbtn" type="button" id="rm-reset">Reset progress</button></div>
   </section>
 </main>
 
@@ -455,10 +490,10 @@ $('#sscrim').onclick=closeSheet;
 /* ---------- render + events ---------- */
 function render(){renderPills();
   if(S.tab==='lessons')renderLessons();else $('#n-lessons').textContent=`(${filtered().length})`;
-  if(S.tab==='latest')renderLatest();if(S.tab==='authors')renderAuthors();
+  if(S.tab==='latest')renderLatest();if(S.tab==='authors')renderAuthors();if(S.tab==='roadmap')renderRoadmap();
   $('#n-topics').textContent=`(${TOPICS.length})`;$('#n-authors').textContent=`(${AUTH.length})`;
   $('#qclr').hidden=!S.q;$('#kbd').hidden=!!S.q}
-function setTab(t){S.tab=t;document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['lessons','latest','authors'].forEach(v=>$('#v-'+v).hidden=v!==t);try{history.replaceState(null,'','#'+t)}catch(e){}render()}
+function setTab(t){S.tab=t;document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['lessons','latest','authors','roadmap'].forEach(v=>$('#v-'+v).hidden=v!==t);try{history.replaceState(null,'','#'+t)}catch(e){}render()}
 function reset(){S.q='';$('#q').value='';S.topic='';S.status='all';S.age=0;S.latestOnly=false;['aud','authors','len'].forEach(k=>S[k].clear());if(S.sort==='rel')S.sort='new';save()}
 function toTop(){const y=document.querySelector('.tabbar').getBoundingClientRect().top+scrollY;if(scrollY>y)scrollTo({top:y})}
 
@@ -484,8 +519,45 @@ document.addEventListener('click',e=>{
   const r=e.target.closest('[data-id]');if(r)openLesson(+r.dataset.id)});
 addEventListener('resize',()=>{if(!$('#pop').hidden)closePop()});
 
+/* ---------- roadmap ---------- */
+const RM_STAGES=[
+ {n:'Foundations',w:'Weeks 1–2',g:'See how AI changes the craft and get your first prototype out.',c:['Workflows & Process','AI Prototyping','Career & Leadership'],d:[20,78,12,136]},
+ {n:'Build',w:'Weeks 3–4',g:'Move from mockups to working things with vibe coding, Claude and Figma MCP.',c:['Vibe Coding & Shipping','Claude & Claude Code','Figma & MCP','AI Prototyping'],d:[79,59,18,8,19]},
+ {n:'Design for AI',w:'Weeks 5–6',g:'Learn the patterns for AI interfaces, trust and agents.',c:['UX for AI Products','Agents & Agentic UX'],d:[27,41,17,45]},
+ {n:'Prove and scale',w:'Weeks 7–8',g:'Research faster, measure whether it works, and make systems AI-ready.',c:['User Research & Testing','Evals & Metrics','Design Systems'],d:[137,15,46,25,39]},
+ {n:'Grow',w:'Ongoing',g:'Plan your career and stay current as the field moves.',c:['Career & Leadership','Strategy & Product'],d:[83,33,144]}];
+const RM_ROLES={designer:'For Designers',researcher:'For User Researchers',pm:'For Product Managers'};
+const RM_LBL={designer:'Designer',researcher:'Researcher',pm:'Product manager'};
+const RM={role:'designer',stage:0,done:new Set()};
+try{const o=JSON.parse(localStorage.getItem('mlf-road')||'{}');if(RM_ROLES[o.role])RM.role=o.role;RM.done=new Set(o.done||[])}catch(e){}
+const rmSave=()=>{try{localStorage.setItem('mlf-road',JSON.stringify({role:RM.role,done:[...RM.done]}))}catch(e){}};
+function rmPlan(role){const used=new Set();
+  return RM_STAGES.map(st=>{let ids;
+    if(role==='designer')ids=st.d.slice();
+    else{const aud=RM_ROLES[role];
+      ids=L.filter(l=>!l.up&&l.lg&&st.c.includes(l.cat)&&l.aud.includes(aud)).sort((a,b)=>b.n-a.n).map(l=>l.id).filter(i=>!used.has(i)).slice(0,st.d.length);}
+    ids.forEach(i=>used.add(i));return ids})}
+const rmMin=l=>l.m||0;
+function renderRoadmap(){
+  const plan=rmPlan(RM.role),all=plan.flat(),r=RM_STAGES[RM.stage],ids=plan[RM.stage];
+  $('#rm-roles').innerHTML=Object.keys(RM_ROLES).map(k=>`<button class="fpill${RM.role===k?' on':''}" type="button" data-rmrole="${k}" aria-pressed="${RM.role===k}">${RM_LBL[k]}</button>`).join('');
+  $('#rm-stages').innerHTML=RM_STAGES.map((s,i)=>{const d=plan[i].filter(x=>RM.done.has(x)).length;return `<button type="button" data-rmstage="${i}" aria-pressed="${i===RM.stage}"><b>${i+1}. ${esc(s.n)}</b>${esc(s.w)} · ${d}/${plan[i].length}</button>`}).join('');
+  const mins=ids.reduce((t,i)=>t+rmMin(L[i]),0);
+  $('#rm-goal').textContent=`${r.g} ${ids.length} lessons${mins?`, about ${(mins/60).toFixed(1)} hours`:''}.`;
+  $('#rm-list').innerHTML=ids.length?ids.map(i=>{const l=L[i],dn=RM.done.has(i);
+    return `<div class="rm-item${dn?' done':''}"><input type="checkbox" data-rmck="${i}" ${dn?'checked':''} aria-label="Mark ${esc(l.t)} as done"><div class="b"><span class="tt">${esc(l.t)}</span><div class="tm">${esc(nameStr(l))} · ${esc(l.se?l.len:(l.m?l.m+' min':l.len))} · ${fmtN(l.n)} joined</div></div><button class="open" type="button" data-id="${l.id}">Open lesson</button></div>`}).join(''):'<p class="rm-goal">No lessons for this role in this stage yet. Try another role.</p>';
+  const dn=all.filter(x=>RM.done.has(x)).length,p=all.length?Math.round(dn/all.length*100):0;
+  $('#rm-bar').style.width=p+'%';$('#rm-pct').textContent=p+'% complete';
+  $('#rm-sum').textContent=`${all.length} lessons · ${(all.reduce((t,i)=>t+rmMin(L[i]),0)/60).toFixed(1)} hours`;
+  $('#n-road').textContent=`(${all.length})`}
+$('#v-roadmap').addEventListener('click',e=>{
+  const ro=e.target.closest('[data-rmrole]');if(ro){RM.role=ro.dataset.rmrole;rmSave();renderRoadmap();return}
+  const sg=e.target.closest('[data-rmstage]');if(sg){RM.stage=+sg.dataset.rmstage;renderRoadmap();return}
+  if(e.target.closest('#rm-reset')){RM.done.clear();rmSave();renderRoadmap()}});
+$('#v-roadmap').addEventListener('change',e=>{const c=e.target.closest('[data-rmck]');if(c){const i=+c.dataset.rmck;c.checked?RM.done.add(i):RM.done.delete(i);rmSave();renderRoadmap()}});
+
 $('#snap').textContent=`Snapshot ${fmtD(SNAP)} · ${L.length} lessons`;
-const h=(location.hash||'').slice(1);setTab(['lessons','latest','authors'].includes(h)?h:'lessons');
+const h=(location.hash||'').slice(1);setTab(['lessons','latest','authors','roadmap'].includes(h)?h:'lessons');
 })();
 </script>
 
